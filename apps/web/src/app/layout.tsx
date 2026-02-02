@@ -60,8 +60,8 @@ const sfProRounded = localFont({
 });
 
 export const metadata: Metadata = {
-	title: "portfolio2026",
-	description: "portfolio2026",
+	title: "ADGV",
+	description: "Anselmo Diogo Guatta Vicente's 2026Portfolio",
 };
 
 export default function RootLayout({
