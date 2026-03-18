@@ -4,7 +4,7 @@ export default function Home() {
 			{/* Noise texture overlay on top of background; pointer-events-none so it doesn't block clicks */}
 			<div
 				aria-hidden
-				className="pointer-events-none absolute inset-0 z-0 bg-[url('/overlay/bg-noize.png')] bg-repeat opacity-60 mix-blend-overlay"
+				className="pointer-events-none absolute inset-0 z-300 bg-[url('/overlay/bg-noize.png')] bg-repeat opacity-60 mix-blend-overlay"
 			/>
 			<div className="relative z-10 flex h-screen flex-col items-center justify-center">
 				<h1 className="font-semibold text-2xl text-primary-foreground">

@@ -29,6 +29,8 @@
   "dependencies": {
     "@portfolio2026/env": "workspace:*",
     "dotenv": "catalog:",
+    "motion": "^12.38.0",
+    "retune": "^0.5.1",
     "zod": "catalog:"
   },
   "devDependencies": {

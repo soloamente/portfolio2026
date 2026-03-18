@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import "../index.css";
 import Navbar from "@/components/navbar";
 import Providers from "@/components/providers";
+import { ProgressiveBlur } from "@/components/ui/progressive-blur";
 
 // SF Pro Rounded from src/fonts (copied from public/fonts so next/font/local can resolve at build)
 const sfProRounded = localFont({
@@ -75,6 +76,16 @@ export default function RootLayout({
 				<Providers>
 					<div className="grid h-svh grid-rows-[auto_1fr]">
 						<Navbar />
+						<ProgressiveBlur
+							backgroundColor="#4D80E6"
+							className="fixed z-20"
+							position="top"
+						/>
+						<ProgressiveBlur
+							backgroundColor="#E9DFE5"
+							className="fixed z-20"
+							position="bottom"
+						/>
 						{children}
 					</div>
 				</Providers>
