@@ -29,6 +29,16 @@ bun run dev
 
 Open [http://localhost:3001](http://localhost:3001) in your browser to see the fullstack application.
 
+## Deploying to Vercel
+
+This repo is a Turborepo: Next.js lives under `apps/web`, not the repository root. If Vercel reports **“No Next.js version detected”**, the project is building from the wrong directory.
+
+1. In the Vercel dashboard, open the project → **Settings** → **General** → **Root Directory**.
+2. Set **Root Directory** to `apps/web` and save.
+3. Leave **Framework Preset** as Next.js (or let Vercel auto-detect).
+
+Vercel will still install workspace dependencies from the monorepo root; `apps/web/vercel.json` pins `installCommand` and `buildCommand` so installs and Turbo builds run from the repo root.
+
 ## Git Hooks and Formatting
 
 - Format and lint fix: `bun run check`

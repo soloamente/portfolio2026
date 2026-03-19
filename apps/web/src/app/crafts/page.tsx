@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { AnimatedHeading } from "@/components/animated-heading";
 
 export default function Crafts() {
 	return (
@@ -9,9 +10,11 @@ export default function Crafts() {
 				className="pointer-events-none absolute inset-0 z-300 bg-[url('/overlay/bg-noize.png')] bg-repeat opacity-60 mix-blend-overlay"
 			/>
 			<section className="relative z-10 mt-[10%] mb-15 flex h-screen flex-col items-center justify-center gap-25">
-				<h1 className="font-semibold text-2xl text-primary-foreground">
-					Some of my small stuff I made in my free time, for fun.
-				</h1>
+				<AnimatedHeading
+					as="h1"
+					className="font-semibold text-2xl text-primary-foreground"
+					text="Some of my small stuff I made in my free time, for fun."
+				/>
 				<div className="h-fit w-fit gap-5 md:grid md:grid-cols-3">
 					<div className="h-[400px] w-[400px] rounded-2xl bg-background/60 p-2.5 backdrop-blur-sm">
 						<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AnimatedHeading } from "@/components/animated-heading";
 import IconDiscord from "@/components/icons/discord";
 import IconEnvelope from "@/components/icons/envelope";
 
@@ -12,10 +13,11 @@ export default function Contact() {
 			/>
 			<div className="relative z-10 flex h-screen flex-col items-center justify-center gap-6 text-center">
 				<div className="flex flex-col items-center justify-center gap-2">
-					<h1 className="max-w-xl text-balance font-semibold text-2xl text-primary-foreground">
-						Contact me if you want to chat about work, a project, or just say
-						hi.
-					</h1>
+					<AnimatedHeading
+						as="h1"
+						className="max-w-xl text-balance font-semibold text-2xl text-primary-foreground"
+						text="Contact me if you want to chat about work, a project, or just say hi."
+					/>
 					{/* <p className="max-w-xl text-base text-primary-foreground/90">
 						If you want to chat about work, a project, or just say hi, email me.
 					</p> */}
