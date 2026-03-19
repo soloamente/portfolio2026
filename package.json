@@ -30,6 +30,7 @@
     "@portfolio2026/env": "workspace:*",
     "dotenv": "catalog:",
     "motion": "^12.38.0",
+    "next": "^16.2.0",
     "retune": "^0.5.1",
     "zod": "catalog:"
   },
