@@ -76,11 +76,11 @@ export default function RootLayout({
 				<Providers>
 					<div className="grid h-svh grid-rows-[auto_1fr]">
 						<Navbar />
-						<ProgressiveBlur
+						{/* <ProgressiveBlur
 							backgroundColor="#4D80E6"
 							className="fixed z-20"
 							position="top"
-						/>
+						/> */}
 						<ProgressiveBlur
 							backgroundColor="#E9DFE5"
 							className="fixed z-20"
