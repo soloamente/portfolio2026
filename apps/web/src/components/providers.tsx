@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 
 import { queryClient } from "@/utils/trpc";
 
+import { SmoothScroll } from "./smooth-scroll";
 import { ThemeProvider } from "./theme-provider";
 import { Toaster } from "./ui/sonner";
 
@@ -14,7 +15,9 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 			defaultTheme="light"
 			disableTransitionOnChange
 		>
-			<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+			<SmoothScroll>
+				<QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+			</SmoothScroll>
 			<Toaster richColors />
 		</ThemeProvider>
 	);

@@ -12,6 +12,9 @@ import { cn } from "@/lib/utils";
 /** Same handle as many editorial sites use for long opacity ramps (see e.g. daybreak.studio-style text-fade-in). */
 export const TEXT_FADE_EASE = [0.61, 1, 0.88, 1] as const;
 
+/** Lead-in before staggered children (heading tokens, card grids) on scroll-driven reveals. */
+export const ENTRANCE_DELAY_S = 0.2;
+
 const motionTags = {
 	div: motion.div,
 	h1: motion.h1,
@@ -51,13 +54,20 @@ export function AnimatedHeading({
 
 	return (
 		<MotionTag
-			className={cn("whitespace-pre text-center", className)}
+			// w-full + flex wrap + justify-center: text-center on shrink-wrapped headings does not
+			// visually center multi-line token spans; this matches the parent width and centers each row.
+			className={cn(
+				"flex w-full max-w-full flex-wrap justify-center whitespace-pre",
+				className,
+			)}
 			initial="hidden"
 			variants={{
 				hidden: {},
 				visible: {
 					transition: {
 						staggerChildren: headingStagger,
+						// Pause before the first token/card so motion reads as one beat after scroll-in.
+						delayChildren: prefersReducedMotion ? 0 : ENTRANCE_DELAY_S,
 					},
 				},
 			}}
@@ -66,7 +76,8 @@ export function AnimatedHeading({
 		>
 			{tokens.map((token, index) => (
 				<motion.span
-					className="inline-block transform-gpu"
+					// Flex items are blockified; no inline-block so rows stay centered under justify-center.
+					className="transform-gpu"
 					key={`${index}-${token}`}
 					transition={tokenTransition}
 					variants={{

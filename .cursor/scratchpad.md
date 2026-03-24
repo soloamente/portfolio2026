@@ -52,6 +52,8 @@
 
 # Executor's Feedback or Assistance Requests
 
+- Lenis smooth scroll (2025-03-24): added `SmoothScroll` using `ReactLenis` from `lenis/react` with `root`, wired in `providers.tsx`; `prefers-reduced-motion: reduce` skips Lenis. Production build for `apps/web` succeeded.
+
 - Planner cross-check complete: all listed success criteria have been met and manually confirmed by user.
 - Project task is complete.
 - Milestone ready for manual verification:

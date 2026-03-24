@@ -135,4 +135,24 @@
 		/* Use direct CSS because this project does not define a Tailwind bg-main-gradient utility. */
 		background: var(--main-gradient);
 	}
+
+	/* Project/craft cards: scale on hover (not y-lift) — only for real hover devices (not touch). */
+	@media (hover: hover) {
+		.card-hover-scale {
+			/* Matches ease-in-out / cubic-bezier(.4, 0, .2, 1); 0.5s as requested for hover in/out. */
+			transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+			transform-origin: center center;
+			will-change: auto;
+		}
+
+		.card-hover-scale:hover {
+			transform: scale(0.99);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.card-hover-scale:hover {
+			transform: none;
+		}
+	}
 }

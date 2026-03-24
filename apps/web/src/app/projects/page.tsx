@@ -1,7 +1,16 @@
-"use client";
-
 import Image from "next/image";
+import { AnimatedCard, AnimatedCardGrid } from "@/components/animated-card";
 import { AnimatedHeading } from "@/components/animated-heading";
+
+/** Stable keys for static placeholder grid (Biome: avoid array index as key). */
+const PROJECT_CARD_KEYS = [
+	"project-ph-1",
+	"project-ph-2",
+	"project-ph-3",
+	"project-ph-4",
+	"project-ph-5",
+	"project-ph-6",
+] as const;
 
 export default function Projects() {
 	return (
@@ -20,68 +29,20 @@ export default function Projects() {
 					text="Some of the projects I've worked on."
 				/>
 
-				<div className="grid h-fit w-fit gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-					<div className="h-[400px] w-[400px] rounded-2xl bg-background/60 p-2.5 backdrop-blur-sm">
-						<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">
-							<Image
-								alt="Project 1"
-								height={3000}
-								src="/placeholder/image1.png"
-								width={3000}
-							/>
-						</div>
-					</div>
-					<div className="h-[400px] w-[400px] rounded-2xl bg-background/60 p-2.5 backdrop-blur-sm">
-						<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">
-							<Image
-								alt="Project 1"
-								height={3000}
-								src="/placeholder/image1.png"
-								width={3000}
-							/>
-						</div>
-					</div>
-					<div className="h-[400px] w-[400px] rounded-2xl bg-background/60 p-2.5 backdrop-blur-sm">
-						<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">
-							<Image
-								alt="Project 1"
-								height={3000}
-								src="/placeholder/image1.png"
-								width={3000}
-							/>
-						</div>
-					</div>
-					<div className="h-[400px] w-[400px] rounded-2xl bg-background/60 p-2.5 backdrop-blur-sm">
-						<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">
-							<Image
-								alt="Project 1"
-								height={3000}
-								src="/placeholder/image1.png"
-								width={3000}
-							/>
-						</div>
-					</div>
-					<div className="h-[400px] w-[400px] rounded-2xl bg-background/60 p-2.5 backdrop-blur-sm">
-						<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">
-							<Image
-								alt="Project 1"
-								height={3000}
-								src="/placeholder/image1.png"
-								width={3000}
-							/>
-						</div>
-					</div>
-					<div className="h-[400px] w-[400px] rounded-2xl bg-background/60 p-2.5 backdrop-blur-sm">
-						<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">
-							<Image
-								alt="Project 1"
-								height={3000}
-								src="/placeholder/image1.png"
-								width={3000}
-							/>
-						</div>
-					</div>
-				</div>
+				<AnimatedCardGrid className="grid h-fit w-fit gap-5 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+					{PROJECT_CARD_KEYS.map((cardKey, index) => (
+						<AnimatedCard className="h-[400px] w-[400px]" key={cardKey}>
+							<div className="h-full w-full overflow-hidden rounded-xl bg-[url('/bg/1.jpg')] bg-center bg-cover">
+								<Image
+									alt={`Project ${index + 1}`}
+									height={3000}
+									src="/placeholder/image1.png"
+									width={3000}
+								/>
+							</div>
+						</AnimatedCard>
+					))}
+				</AnimatedCardGrid>
 			</section>
 		</main>
 	);

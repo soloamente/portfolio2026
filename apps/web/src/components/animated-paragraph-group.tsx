@@ -6,7 +6,7 @@
  */
 
 import { motion } from "motion/react";
-import { TEXT_FADE_EASE } from "@/components/animated-heading";
+import { ENTRANCE_DELAY_S, TEXT_FADE_EASE } from "@/components/animated-heading";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 
@@ -44,6 +44,7 @@ export function AnimatedParagraphGroup({
 				visible: {
 					transition: {
 						staggerChildren: prefersReducedMotion ? 0 : staggerParagraphs,
+						delayChildren: prefersReducedMotion ? 0 : ENTRANCE_DELAY_S,
 					},
 				},
 			}}
