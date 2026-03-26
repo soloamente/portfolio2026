@@ -58,7 +58,7 @@ export function AnimatedHeading({
 			// visually center multi-line token spans; this matches the parent width and centers each row.
 			className={cn(
 				"flex w-full max-w-full flex-wrap justify-center whitespace-pre",
-				className,
+				className
 			)}
 			initial="hidden"
 			variants={{

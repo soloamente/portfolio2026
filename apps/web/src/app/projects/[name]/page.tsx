@@ -9,7 +9,7 @@ export default async function ProjectPage(props: ProjectPageProps) {
 	const title = decodeURIComponent(name);
 
 	return (
-		<main className="relative flex min-h-screen flex-col items-center justify-center bg-linear-to-b from-0% from-[#4D80E6] to-100% to-[#E9DFE5] p-24">
+		<main className="relative flex min-h-screen flex-col items-center justify-center bg-transparent p-24">
 			{/* Noise texture overlay on top of background; pointer-events-none so it doesn't block clicks */}
 			<div
 				aria-hidden

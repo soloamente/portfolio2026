@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import type { ComponentProps } from "react";
 import { useLayoutEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { ModeToggle } from "./mode-toggle";
 
 // Typed routes expect href to match generated Route; cast so link arrays work
 type LinkHref = ComponentProps<typeof Link>["href"];
@@ -105,53 +106,56 @@ export default function Navbar() {
 
 	return (
 		<div className="fixed right-0 bottom-5 left-0 z-500 flex items-center justify-center px-2 py-1">
-			<nav
-				className="relative flex h-fit w-fit rounded-full bg-background/35 p-1 text-lg backdrop-blur-sm"
-				ref={navRef}
-			>
-				{/* Shared white pill layer that sits under all labels; we reveal only the active area via clip-path */}
-				{pillClip && (
-					<div
-						aria-hidden="true"
-						// We inset the pill slightly on the Y axis so the original vertical padding of the nav is preserved.
-						className="pointer-events-none absolute inset-x-0 inset-y-1 z-0 bg-background"
-						style={{
-							clipPath: pillClip.clipPath,
-							// We animate the clip-path so the pill glides smoothly between labels
-							transition: `clip-path ${CLIP_PATH_TRANSITION_MS}ms ${CLIP_PATH_EASING}`,
-							willChange: "clip-path",
-							// Put the shadow on the moving pill itself so it stays in sync
-							// with the animation (no instant "label glow" jump).
-							filter: "drop-shadow(0px 0px 7px rgba(0,0,0,0.09))",
-						}}
-					/>
-				)}
-
-				{links.map(({ to, label }) => {
-					// Home: active only on exact "/"; other routes: exact match or nested path
-					const isActive =
-						to === "/"
-							? pathname === "/"
-							: pathname === to || pathname.startsWith(`${to}/`);
-
-					return (
-						<Link
-							className={cn(
-								"relative z-10 rounded-full px-4.25 py-2.75 font-medium text-sm leading-none opacity-50",
-								isActive && "opacity-100"
-							)}
-							href={to as LinkHref}
-							key={to}
-							ref={(element) => {
-								// We store each anchor so the pill can align to its bounding box
-								linkRefs.current[to] = element;
+			<div className="flex items-center gap-2">
+				<nav
+					className="relative flex h-fit w-fit rounded-full bg-background/35 p-1 text-lg backdrop-blur-sm"
+					ref={navRef}
+				>
+					{/* Shared white pill layer that sits under all labels; we reveal only the active area via clip-path */}
+					{pillClip && (
+						<div
+							aria-hidden="true"
+							// We inset the pill slightly on the Y axis so the original vertical padding of the nav is preserved.
+							className="pointer-events-none absolute inset-x-0 inset-y-1 z-0 bg-background"
+							style={{
+								clipPath: pillClip.clipPath,
+								// We animate the clip-path so the pill glides smoothly between labels
+								transition: `clip-path ${CLIP_PATH_TRANSITION_MS}ms ${CLIP_PATH_EASING}`,
+								willChange: "clip-path",
+								// Put the shadow on the moving pill itself so it stays in sync
+								// with the animation (no instant "label glow" jump).
+								filter: "drop-shadow(0px 0px 7px rgba(0,0,0,0.09))",
 							}}
-						>
-							{label}
-						</Link>
-					);
-				})}
-			</nav>
+						/>
+					)}
+
+					{links.map(({ to, label }) => {
+						// Home: active only on exact "/"; other routes: exact match or nested path
+						const isActive =
+							to === "/"
+								? pathname === "/"
+								: pathname === to || pathname.startsWith(`${to}/`);
+
+						return (
+							<Link
+								className={cn(
+									"relative z-10 rounded-full px-4.25 py-2.75 font-medium text-sm leading-none opacity-50",
+									isActive && "opacity-100"
+								)}
+								href={to as LinkHref}
+								key={to}
+								ref={(element) => {
+									// We store each anchor so the pill can align to its bounding box
+									linkRefs.current[to] = element;
+								}}
+							>
+								{label}
+							</Link>
+						);
+					})}
+				</nav>
+				<ModeToggle />
+			</div>
 		</div>
 	);
 }

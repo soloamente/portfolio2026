@@ -12,7 +12,7 @@ const CRAFT_CARD_KEYS = [
 
 export default function Crafts() {
 	return (
-		<main className="relative flex h-fit min-h-screen flex-col items-center justify-between bg-linear-to-b from-0% from-[#4D80E6] via-100% via-[#E9DFE5] to-200% to-[#4D80E6]">
+		<main className="relative flex h-fit min-h-screen flex-col items-center justify-between bg-transparent">
 			{/* Noise texture overlay on top of background; pointer-events-none so it doesn't block clicks */}
 			<div
 				aria-hidden

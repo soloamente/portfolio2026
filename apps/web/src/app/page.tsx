@@ -2,7 +2,7 @@ import { AnimatedHeading } from "@/components/animated-heading";
 
 export default function Home() {
 	return (
-		<main className="relative flex min-h-screen flex-col items-center justify-between bg-linear-to-b from-0% from-[#4D80E6] to-100% to-[#E9DFE5] p-24">
+		<main className="relative flex min-h-screen flex-col items-center justify-between bg-transparent p-24">
 			{/* Noise texture overlay on top of background; pointer-events-none so it doesn't block clicks */}
 			<div
 				aria-hidden

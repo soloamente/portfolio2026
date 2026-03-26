@@ -6,7 +6,10 @@
  */
 
 import { motion } from "motion/react";
-import { ENTRANCE_DELAY_S, TEXT_FADE_EASE } from "@/components/animated-heading";
+import {
+	ENTRANCE_DELAY_S,
+	TEXT_FADE_EASE,
+} from "@/components/animated-heading";
 import { usePrefersReducedMotion } from "@/hooks/use-prefers-reduced-motion";
 import { cn } from "@/lib/utils";
 

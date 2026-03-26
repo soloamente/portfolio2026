@@ -20,8 +20,6 @@ export default function Projects() {
 				aria-hidden
 				className="pointer-events-none absolute inset-0 z-300 bg-[url('/overlay/bg-noize.png')] bg-repeat opacity-60 mix-blend-overlay"
 			/>
-
-			<div className="main-gradient fixed inset-0 z-0" />
 			<section className="relative z-10 mt-[10%] mb-15 flex h-screen flex-col items-center justify-center gap-25">
 				<AnimatedHeading
 					as="h1"

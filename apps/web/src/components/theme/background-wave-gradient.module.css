@@ -1,0 +1,26 @@
+.overlayWave {
+	/* Start with strong blur for the "wave" handoff into the new gradient. */
+	filter: blur(28px);
+	opacity: 1;
+	animation: waveGradientFadeOut 900ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes waveGradientFadeOut {
+	from {
+		filter: blur(28px);
+		opacity: 1;
+	}
+
+	to {
+		filter: blur(0px);
+		opacity: 0;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.overlayWave {
+		animation: none;
+		filter: none;
+		opacity: 0;
+	}
+}
