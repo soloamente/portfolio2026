@@ -60,16 +60,28 @@ export function AnimatedCardGrid({
 export interface AnimatedCardProps {
 	className?: string;
 	children: React.ReactNode;
+	/**
+	 * Optional shared-layout id for the built-in card shell.
+	 * This allows parent features to morph the existing wrapper without adding
+	 * a second wrapper element around card content.
+	 */
+	shellLayoutId?: string;
+	shellTransition?: Record<string, unknown>;
 }
 
-export function AnimatedCard({ className, children }: AnimatedCardProps) {
+export function AnimatedCard({
+	className,
+	children,
+	shellLayoutId,
+	shellTransition,
+}: AnimatedCardProps) {
 	const prefersReducedMotion = usePrefersReducedMotion();
 	const tokenTransition = prefersReducedMotion
 		? { duration: 0.2, ease: TEXT_FADE_EASE }
 		: {
-				opacity: { duration: 0.9, ease: TEXT_FADE_EASE },
-				y: { duration: 0.9, ease: HEADING_Y_EASE },
-				filter: { duration: 0.58, ease: TEXT_FADE_EASE },
+				opacity: { duration: 0.2, ease: TEXT_FADE_EASE },
+				y: { duration: 0.2, ease: HEADING_Y_EASE },
+				filter: { duration: 0.18, ease: TEXT_FADE_EASE },
 			};
 
 	return (
@@ -86,9 +98,13 @@ export function AnimatedCard({ className, children }: AnimatedCardProps) {
 			}}
 		>
 			{/* Inner shell: hover scale uses CSS transform here so it does not fight Motion’s transform on the outer node. */}
-			<div className="card-hover-scale h-full w-full cursor-pointer rounded-2xl bg-background/60 p-2 backdrop-blur-sm hover:shadow-orange-300/5 hover:shadow-sm">
+			<motion.div
+				className="card-hover-scale h-full w-full cursor-pointer rounded-2xl bg-background/60 p-2 backdrop-blur-sm hover:shadow-orange-300/5 hover:shadow-sm"
+				layoutId={shellLayoutId}
+				transition={shellTransition}
+			>
 				{children}
-			</div>
+			</motion.div>
 		</motion.div>
 	);
 }

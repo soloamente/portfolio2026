@@ -3,6 +3,8 @@
 - Executor mode requested by user with TDD workflow.
 - Need to execute one subtask at a time and report milestone for manual verification.
 - New planner request: add a visual way to preview all background palettes and tweak animation settings before deciding final art direction.
+- New planner request: design a Daybreak-style projects interaction where clicking a project card expands into a dialog, category cards open a bottom drawer, and state is URL-driven under `/projects`.
+- New planner request: build an Interface Craft storyboard for a card-wrapper morph animation where project card media wrapper expands into a full-page dialog and reverses back to the exact originating card position on close.
 
 # Key Challenges and Analysis
 
@@ -19,6 +21,12 @@
 - Spec gap: wave-blur / gradient controller needs to account for existing `--main-gradient` overrides in `apps/web/src/index.css` (values differ for `:root` vs `.dark`) and for avoiding wave animations on initial hydration when `prefers-reduced-motion` is true.
 - Spec gap: testing plan currently assumes component tests; repo doesn’t have `apps/web/src/**/*.test.*` files yet, so component testing setup (likely `bun:test`) should be explicitly added or component tests marked optional.
 - Need a low-risk preview surface that does not accidentally change production behavior while allowing real-time color/animation experimentation.
+- Need a deterministic shared-element strategy so open/close transitions always animate from/to the exact same card wrapper geometry, including scroll offset changes.
+- Need explicit motion choreography for two visual tracks:
+  - wrapper transform/morph (size, border radius, position, backdrop)
+  - image handoff (fade + blur out on open, fade + blur in on close)
+- Need strict reduced-motion parity so the same route/state changes remain fully usable with minimal opacity-only transitions.
+- Need route and focus semantics preserved during morph lifecycle (`/projects` <-> `/projects/[name]`) without visual jump or focus loss.
 
 # High-level Task Breakdown
 
@@ -30,6 +38,18 @@
    - Success criteria: all invoked checks pass for touched files/tasks.
 4. Implement user-requested feature: time-based theme + background gradient with `light` / `dark` / `time-based` modes.
    - Success criteria: selecting modes updates the theme and background gradient immediately; `time-based` updates every minute; gradients reflect day period (dawn/night dark; morning/afternoon light).
+5. Plan route-driven projects overlay flow (`/projects` -> `/projects/[name]` -> `/projects/[name]/[category]`) with explicit TDD, a11y, and verification matrix before implementation.
+   - Success criteria: approved implementation plan document exists in `docs/superpowers/plans` and aligns with brainstorm decisions.
+6. Define Interface Craft storyboard contract for project card wrapper morph (open and close) before implementation changes.
+   - Success criteria: storyboard includes ASCII timeline, single timing source, element config objects, stage-driven state model, reduced-motion fallback rules, and explicit route/focus behavior.
+7. Implement shared-wrapper morph shell with deterministic geometry capture for open/close.
+   - Success criteria: opening `/projects/[name]` visually expands from clicked card wrapper; closing returns to same card wrapper geometry.
+8. Implement image handoff choreography inside wrapper (blur/fade out during expansion, project detail content fade-in after container settle).
+   - Success criteria: no double-image flicker; image presence is continuous and intentional across stage boundaries.
+9. Add reverse timeline + exit guardrails (close button, Escape, browser back) using same stage constants.
+   - Success criteria: all close paths execute same reverse choreography and return route/focus correctly.
+10. Add/extend tests for routing/state helpers and run build/lint verification for edited files.
+   - Success criteria: targeted tests pass, app build succeeds, lint clean on touched files.
 
 # Project Status Board
 
@@ -53,8 +73,204 @@
 - [x] Theme-lab Task 4: controls panel UI
 - [x] Theme-lab Task 5: preview canvas + simulation trigger
 - [x] Theme-lab Task 6: verification (tests + build + runtime)
+- [x] Brainstorm: route-driven projects overlay interaction documented and approved by user (Approach A)
+- [x] Planning: route-driven projects overlay implementation plan drafted and reviewer-approved
+- [x] Projects overlay Task 1: projects data contract implemented with TDD and review gates passed
+- [x] Projects overlay Task 2: route param validation helpers implemented with TDD and review gates passed
+- [x] Projects overlay Task 3: convert project card to route entry point implemented with TDD and review gates passed
+- [x] Projects overlay Task 4: shared shell + `/projects/[name]` overlay state implemented with TDD and review gates passed
+- [x] Projects overlay Task 5: category drawer component + `/projects/[name]/[category]` route implemented with TDD and review gates passed
+- [x] Projects overlay Task 6: animation contract + reduced-motion parity implemented with review gates passed
+- [x] Projects overlay Task 7: automated verification + tracking updates complete; manual route QA pending user confirmation
+- [x] Update Cura card cover source to `Scene-1 (1).json`
+- [x] Fix relative Cura cover path resolution (`./covers/Cura.json` lookup)
+- [x] Make Cura cover messaging OS-agnostic
+- [x] Planner: storyboard plan drafted for project-card wrapper morph to full-page dialog
+- [x] Executor Task 1: add storyboard constants and stage model to projects overlay components
+- [x] Executor Task 2: implement wrapper shared-element open morph (card -> dialog shell)
+- [ ] Executor Task 3: implement image blur/fade handoff and detail-content reveal sequencing
+- [ ] Executor Task 4: implement reverse morph on close/back/escape with focus restoration
+- [ ] Executor Task 5: verification (tests/build/lint + manual UX checklist)
 
 # Current Status / Progress Tracking
+
+- Executor correction milestone complete (post-feedback realignment):
+  - Reworked projects interaction to align with user-requested implementation details:
+    - enabled Next.js View Transitions experiment in `apps/web/next.config.ts` (`experimental.viewTransition = true`)
+    - added route transition hints via `Link` `transitionTypes` on project open/close and category open/close links
+    - added shared `view-transition-name` on project media wrapper in grid and dialog media area for card-to-dialog morph continuity
+  - Replaced custom drawer implementation with Base UI Drawer primitives in:
+    - `apps/web/src/app/projects/_components/project-category-drawer.tsx`
+    - uses `Drawer.Root`, `Drawer.Portal`, `Drawer.Backdrop`, `Drawer.Viewport`, `Drawer.Popup`, `Drawer.Content`, `Drawer.Title`, `Drawer.Description`
+  - Upgraded Base UI package to get Drawer support:
+    - `@base-ui/react` -> `1.3.0`
+  - Cleanup:
+    - removed unnecessary `framer-motion` dependency added during prior review loop.
+  - Verification:
+    - `bun test src/app/projects/_lib/projects-routing.test.ts` -> pass
+    - `bun test src/app/projects/_lib/projects-data.test.ts` -> pass
+    - `bun run build` -> pass (with `viewTransition` experiment enabled)
+    - lint diagnostics on touched files -> clean
+
+- Executor milestone complete (Task 7 verification + tracking update):
+  - Automated verification complete:
+    - `cd apps/web && bun test` -> pass (20 pass, 0 fail)
+    - `cd apps/web && bun run build` -> pass
+  - Current route inventory confirms expected states exist:
+    - `/projects` (static)
+    - `/projects/[name]` (dynamic)
+    - `/projects/[name]/[category]` (dynamic)
+  - Browser automation attempt for full manual QA matrix was blocked by tooling usage-limit in session, so final route-interaction verification requires user manual pass.
+  - Manual QA checklist for user:
+    - card click on `/projects` navigates to `/projects/[name]`
+    - category click navigates to `/projects/[name]/[category]`
+    - drawer close/back returns to `/projects/[name]`
+    - browser back sequence: category -> project -> grid
+    - direct invalid routes show not-found (`/projects/unknown`, `/projects/project-scene-1/unknown`)
+    - mobile viewport preserves same interaction sequence
+
+- Executor milestone complete (subagent-driven Task 6 only):
+  - Updated motion behavior in:
+    - `apps/web/src/app/projects/_components/project-dialog-overlay.tsx`
+    - `apps/web/src/app/projects/_components/project-category-drawer.tsx`
+    - `apps/web/src/app/projects/_components/projects-route-shell.tsx`
+    - `apps/web/src/components/animated-card.tsx` (timing tightened for brisk interactions)
+  - Animation contract now covers:
+    - card -> dialog enter/exit feel
+    - dialog -> drawer layering transitions
+    - directional close/back behavior
+  - Reduced-motion parity:
+    - removed non-essential transform motion on reduced-motion paths
+    - kept minimal opacity behavior only
+  - Convention alignment:
+    - retained `motion/react` imports per user preference/rule.
+  - Verification:
+    - `bun test src/app/projects/_lib/projects-routing.test.ts` -> pass (5 pass)
+    - `bun test src/app/projects/_lib/projects-data.test.ts` -> pass (3 pass)
+    - `bun run build` -> pass
+    - lint diagnostics on touched Task 6 files -> clean
+  - Review gates:
+    - spec compliance review: APPROVED
+    - code quality review: APPROVED
+
+- Executor milestone complete (subagent-driven Task 5 only):
+  - Created `apps/web/src/app/projects/_components/project-category-drawer.tsx`:
+    - bottom drawer overlay with labeled heading and route-based close affordance.
+    - Escape-key close support.
+    - focus restoration to originating category trigger before close navigation.
+  - Created `apps/web/src/app/projects/[name]/[category]/page.tsx`:
+    - composes grid + dialog + drawer using `ProjectsRouteShell`.
+    - enforces `notFound()` for invalid/mismatched category states.
+  - Updated `apps/web/src/app/projects/_components/projects-route-shell.tsx`:
+    - now accepts and renders `drawerOverlay` alongside `dialogOverlay`.
+  - Updated routing helpers/tests:
+    - added `resolveProjectCategoryFromRouteParam(...)` to `apps/web/src/app/projects/_lib/projects-routing.ts`.
+    - expanded `apps/web/src/app/projects/_lib/projects-routing.test.ts` with invalid/mismatched/malformed category assertions.
+  - Verification:
+    - `bun test src/app/projects/_lib/projects-routing.test.ts` -> pass (5 pass, 0 fail)
+    - `bun run build` -> pass (includes `/projects/[name]/[category]` route)
+  - Review gates:
+    - spec compliance review: APPROVED (after one focus-return fix loop)
+    - code quality review: APPROVED
+  - Lint on touched files: clean.
+
+- Executor milestone complete (subagent-driven Task 4 only):
+  - Created `apps/web/src/app/projects/_components/projects-route-shell.tsx`:
+    - shared composition shell for projects views.
+    - supports grid-only and grid+dialog states.
+    - stable module-relative Lottie cover loading + minimal runtime JSON shape guard.
+  - Created `apps/web/src/app/projects/_components/project-dialog-overlay.tsx`:
+    - project dialog baseline with title + category cards.
+    - keyboard-reachable back affordance to `/projects`.
+    - baseline a11y semantics (`role="dialog"`, `aria-labelledby`, initial focus target).
+  - Updated `apps/web/src/app/projects/[name]/page.tsx`:
+    - validates route param and calls `notFound()` for invalid/malformed slugs.
+    - composes shared shell + dialog overlay for valid project state.
+  - Updated routing utility/tests:
+    - moved `resolveProjectFromRouteParam(...)` into `apps/web/src/app/projects/_lib/projects-routing.ts` to avoid test coupling to route file.
+    - updated `apps/web/src/app/projects/_lib/projects-routing.test.ts` with invalid-route assertions (unknown + malformed params).
+  - Verification:
+    - `bun test src/app/projects/_lib/projects-routing.test.ts` -> pass (4 pass, 0 fail)
+    - `bun run build` -> pass
+  - Review gates:
+    - spec compliance review: APPROVED
+    - code quality review: APPROVED (after one focused fix loop)
+  - Lint on touched files: clean.
+
+- Executor milestone complete (subagent-driven Task 3 only):
+  - Created `apps/web/src/app/projects/_components/project-card-link.tsx`:
+    - introduced `ProjectCardLink` wrapper for route entry behavior.
+    - introduced `getProjectHref(slug)` route contract helper.
+    - tightened slug typing to `ProjectRecord["slug"]`.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - renders project cards from `PROJECTS` data.
+    - routes each card to `/projects/[name]` via `ProjectCardLink`.
+    - preserved existing Lottie cover rendering behavior.
+    - improved error observability by logging file-read/parse failures with context before fallback.
+  - Updated `apps/web/src/app/projects/_lib/projects-data.test.ts`:
+    - added explicit href contract checks for `/projects/[name]`.
+  - Verification:
+    - `bun test src/app/projects/_lib/projects-data.test.ts` -> pass (3 pass, 0 fail)
+    - `bun run build` -> pass
+  - Review gates:
+    - spec compliance review: APPROVED
+    - code quality review: APPROVED (after one fix loop)
+  - Lint note:
+    - IDE reports `@/components/project-cover-lottie` unresolved in `projects/page.tsx`, but build/typecheck succeeds; likely stale IDE diagnostic.
+
+- Executor milestone complete (subagent-driven Task 2 only):
+  - Created `apps/web/src/app/projects/_lib/projects-routing.ts` with pure helpers:
+    - `getProjectByNameSlug(name)`
+    - `getProjectCategoryBySlug(project, category)`
+  - Created `apps/web/src/app/projects/_lib/projects-routing.test.ts` with coverage for:
+    - valid project slug resolution
+    - invalid project slug -> `null`
+    - valid project category resolution
+    - invalid category slug -> `null`
+    - mismatched cross-project category slug -> `null`
+  - TDD evidence:
+    - initial targeted test failed before implementation (missing module)
+    - targeted test now passes (3 pass, 0 fail)
+  - Review gates:
+    - spec compliance review: APPROVED
+    - code quality review: APPROVED (after one strict-type-safety fix loop in tests)
+  - Lint on touched files: clean.
+
+- Executor milestone complete (subagent-driven Task 1 only):
+  - Created `apps/web/src/app/projects/_lib/projects-data.ts` with immutable-friendly typed contracts:
+    - `ProjectCategoryRecord`
+    - `ProjectRecord`
+    - `PROJECTS` (`as const satisfies readonly ProjectRecord[]`)
+  - Created `apps/web/src/app/projects/_lib/projects-data.test.ts` with contract coverage for:
+    - URL-safe project/category slugs
+    - minimum category count per project
+    - trimmed non-empty project titles/category labels
+    - unique project slugs
+    - unique category slugs per project
+    - route composition invariants for `/projects/[name]/[category]`
+  - TDD evidence:
+    - initial targeted test failed before implementation (missing module)
+    - targeted test now passes (2 pass, 0 fail)
+  - Review gates:
+    - spec compliance review: APPROVED
+    - code quality review: APPROVED (after one fix loop)
+  - Lint on touched files: clean.
+
+- Planner milestone complete:
+  - Implementation plan written: `docs/superpowers/plans/2026-03-26-projects-route-driven-overlay-implementation-plan.md`
+  - Plan review loop passed (Approved) after filling gaps:
+    - invalid-route handling (`notFound`) coverage
+    - overlay/drawer accessibility expectations
+    - mobile parity verification
+    - commit steps marked optional-by-user-request
+
+- Planner milestone complete:
+  - Brainstorm captured in `docs/brainstorms/2026-03-26-projects-route-driven-overlay-brainstorm.md`.
+  - Confirmed interaction model:
+    - `/projects` => grid
+    - `/projects/[project]` => expanded dialog state
+    - `/projects/[project]/[category]` => bottom drawer over dialog
+  - User decisions locked: expand-inline, drawer-over-dialog, drawer dismiss returns to dialog, same mobile behavior, keep `/projects` namespace.
 
 - Executor milestone (About page copy refresh) complete:
   - Updated `apps/web/src/app/about/page.tsx` paragraph copy for stronger clarity, grammar, and value articulation.
@@ -207,6 +423,138 @@
     - simulation trigger button works and runs animation cycle
   - Note:
     - browser automation context continues to surface a known hydration-warning overlay tied to injected tool attributes (`data-cursor-ref`), but functional checks above still pass.
+- Executor: completed single-step fix for Next.js 16 prerender current-time error.
+  - Updated `apps/web/src/components/theme/theme-mode-controller.tsx`:
+    - replaced initial `dayPeriod` state initializer (`getDayPeriod(new Date())`) with deterministic `"afternoon"`.
+    - kept existing hydration effect that immediately syncs real local-time day period after mount.
+  - Verification:
+    - `cd apps/web && bun test src/components/theme/theme-utils.test.ts` passes (7 pass, 0 fail)
+    - lint diagnostics clean on touched file.
+- Executor: completed projects-page single-card update with user-provided Lottie cover file path.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - reduced grid to one project card only
+    - replaced placeholder image with `ProjectCoverLottie`
+    - added server-side JSON loader for `/home/adgv/Downloads/Scene-1.json`
+  - Created `apps/web/src/components/project-cover-lottie.tsx`:
+    - renders `lottie-react` animation when JSON is available
+    - renders clear fallback text when file is unavailable or invalid
+  - Added dependency: `lottie-react`
+- Executor: adjusted projects-page single-card layout after user feedback.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - reduced top margin (`mt-[10%]` -> `mt-6`)
+    - reduced section spacing (`gap-25` -> `gap-16`)
+    - stabilized heading width (`w-full max-w-[20ch]`) and centered text
+    - switched section height to `min-h-screen` for less rigid vertical spacing
+- Executor: fixed `/projects` blocking-route regression from uncached server data.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - marked `readProjectCoverAnimationData()` with Next.js Cache Components directive (`"use cache"`)
+    - keeps local JSON file read but allows prerender without route-level blocking on `/projects`
+  - Verification:
+    - build no longer reports `/projects` uncached read; remaining blocking-route errors are pre-existing in `/projects/[name]` (`Navbar` / `SmoothScroll` path)
+- Executor: adjusted heading-to-card spacing on projects page after user UI feedback.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - increased section vertical gap (`gap-16` -> `gap-22`) so heading is visually separated from the single project card.
+- Executor: removed Cache Components dependency for projects cover loader per user request.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - removed `"use cache"` from `readProjectCoverAnimationData()`
+    - this resolves the build error when `cacheComponents` is disabled in Next.js config.
+- Executor: updated Cura card project cover file path to the new local asset.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - switched `PROJECT_COVER_LOTTIE_PATH` to `/home/adgv/Downloads/Scene-1 (1).json`
+  - Updated `apps/web/src/components/project-cover-lottie.tsx`:
+    - updated missing-file fallback message to the same new file path for accurate debugging output.
+- Executor: updated Cura card project cover to the repo-hosted asset path.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - switched `PROJECT_COVER_LOTTIE_PATH` to `/home/adgv/Projects/portfolio2026/apps/web/public/projects/Cura/Cura.json`
+  - Updated `apps/web/src/components/project-cover-lottie.tsx`:
+    - updated missing-file fallback message to the same repo path.
+- Executor: fixed unresolved relative path for Cura JSON cover lookup.
+  - Updated `apps/web/src/app/projects/page.tsx`:
+    - replaced relative `./covers/Cura.json` usage with `path.join(process.cwd(), "src/app/projects/covers/Cura.json")`
+    - added `node:path` import and inline comment clarifying cwd-vs-file-path behavior.
+  - Updated `apps/web/src/components/project-cover-lottie.tsx`:
+    - fallback message now points to `/home/adgv/Projects/portfolio2026/apps/web/src/app/projects/covers/Cura.json`.
+- Executor: made fallback messaging portable across Linux/Windows/macOS.
+  - Updated `apps/web/src/components/project-cover-lottie.tsx`:
+    - replaced absolute Linux path text with repo-relative `src/app/projects/covers/Cura.json`.
+
+- Executor milestone complete (Task 1 only: storyboard constants + stage model scaffold):
+  - Created `apps/web/src/app/projects/_components/project-morph-storyboard.ts`:
+    - added ASCII storyboard timeline
+    - added stage contract (`PROJECT_MORPH_STAGE`)
+    - added shared timing source (`PROJECT_MORPH_TIMING`)
+    - added wrapper/image/content config objects for future animation tasks
+  - Updated `apps/web/src/app/projects/_components/project-dialog-overlay.tsx`:
+    - wired in storyboard constants/types
+    - added stage state (`morphStage`) with timed stage progression scaffold
+    - replaced hardcoded close/motion timing values with shared constants
+    - added `data-morph-stage` marker for debugging/verification
+  - Verification:
+    - `cd apps/web && bun test src/app/projects/_lib/projects-routing.test.ts` -> pass
+    - `cd apps/web && bun test src/app/projects/_lib/projects-data.test.ts` -> pass
+    - lint diagnostics on touched files -> clean
+
+- Executor milestone complete (Task 2 only: wrapper shared-element open morph):
+  - Updated `apps/web/src/app/projects/_components/projects-page-experience.tsx`:
+    - added shared morph contract imports (`PROJECT_MORPH_STAGE`, `PROJECT_MORPH_WRAPPER`)
+    - introduced `morphStage` state to track open/close wrapper phase
+    - wrapped project card media with `motion.div layoutId="project-wrapper-{slug}"` for source wrapper identity
+    - wrapped active dialog media with matching `motion.div layoutId="project-wrapper-{slug}"` for destination wrapper identity
+    - applied shared transition config from storyboard constants to both wrapper endpoints
+    - preserved existing image surface `viewTransitionName` to keep media continuity intact
+  - Result:
+    - opening a project now uses a shared wrapper identity, enabling card-wrapper-to-dialog-wrapper morph instead of an isolated drawer media jump.
+  - Verification:
+    - `cd apps/web && bun test src/app/projects/_lib/projects-routing.test.ts` -> pass
+    - `cd apps/web && bun test src/app/projects/_lib/projects-data.test.ts` -> pass
+    - lint diagnostics on touched file -> clean
+
+- Executor correction applied (Task 2 follow-up based on user validation):
+  - User reported the interaction still opened as a bottom drawer.
+  - Updated `apps/web/src/app/projects/_components/projects-page-experience.tsx` to remove drawer container behavior and render a full-page dialog overlay instead:
+    - replaced bottom-sheet `Drawer` shell with fixed full-screen backdrop + full-page dialog panel
+    - preserved shared wrapper morph target (`layoutId="project-wrapper-{slug}"`) for card->dialog expansion continuity
+    - preserved category and URL state behavior
+    - preserved close behavior via backdrop click and explicit close button
+    - re-added Escape-key close handling in component-level listener
+  - Verification:
+    - `cd apps/web && bun test src/app/projects/_lib/projects-routing.test.ts` -> pass
+    - `cd apps/web && bun test src/app/projects/_lib/projects-data.test.ts` -> pass
+    - lint diagnostics on touched file -> clean
+
+- Executor correction applied (animation direction realignment from latest user feedback):
+  - User clarified desired behavior:
+    - no drawer/dialog container feel
+    - wrapper itself expands to fill the page
+    - image should not scale with wrapper growth
+  - Updated `apps/web/src/app/projects/_components/projects-page-experience.tsx`:
+    - removed backdrop/dialog-shell framing in expanded state
+    - promoted the shared wrapper (`layoutId="project-wrapper-{slug}"`) to become a full-page expanding surface
+    - kept project media at fixed card dimensions (`400x400`) in expanded state so visual emphasis is wrapper growth, not image growth
+    - retained close button + Escape close behavior
+  - Verification:
+    - `cd apps/web && bun test src/app/projects/_lib/projects-routing.test.ts` -> pass
+    - `cd apps/web && bun test src/app/projects/_lib/projects-data.test.ts` -> pass
+    - lint diagnostics on touched file -> clean
+
+- Planner milestone complete (Interface Craft storyboard plan for wrapper morph):
+  - Choreography intent captured:
+    - click project card media wrapper -> wrapper expands/morphs to viewport dialog shell
+    - source image blurs/fades away during morph
+    - project detail content and secondary images fade in after wrapper settles
+    - close (`X`/Escape/back) reverses the same choreography to original card geometry
+  - Storyboard stage contract for implementation:
+    - Stage 0: idle card state on `/projects`
+    - Stage 1: lock source geometry + elevate wrapper layer
+    - Stage 2: wrapper morph/expand to dialog bounds
+    - Stage 3: hero image blur/fade out while detail content fades/slides in
+    - Stage 4: settled detail dialog interactive state
+    - Stage 5-2-1 (reverse): content fade out -> wrapper collapse -> image restore at origin
+  - Implementation constraints recorded for Executor:
+    - single source of truth for timing constants
+    - no inline motion magic numbers
+    - reduced-motion fallback with opacity-only transitions
+    - route/focus semantics preserved across open/close
 
 # Executor's Feedback or Assistance Requests
 
@@ -240,6 +588,37 @@
 - New milestone (Theme Lab Task 5 scope requested by user):
   - Real preview canvas + simulation trigger is implemented and validated.
   - Task 6 has not been executed yet.
+- New milestone (Next.js 16 runtime error fix):
+  - `/about` current-time prerender violation addressed by removing `new Date()` from Client Component initial render path.
+  - Please manually verify the `/about` page no longer logs `next-prerender-current-time-client` in the browser console.
+- New milestone (projects cover update):
+  - Projects page now renders exactly one project card with Lottie cover loaded from `/home/adgv/Downloads/Scene-1.json`.
+  - Please manually verify `/projects` displays the animation and confirm if you also want this wired to the project detail page.
+- New milestone (Cura cover file swap):
+  - Cura project cover now points to `/home/adgv/Downloads/Scene-1 (1).json`.
+  - Please refresh `/projects` and confirm the animation renders from this exact file.
+- New milestone (Cura cover moved into repo public dir):
+  - Cura project cover now points to `/home/adgv/Projects/portfolio2026/apps/web/public/projects/Cura/Cura.json`.
+  - Please refresh `/projects` and confirm the animation renders from the repo asset.
+- New milestone (Cura relative path fix):
+  - The loader no longer depends on relative cwd path resolution (`./covers/...`).
+  - It now resolves from app root to `src/app/projects/covers/Cura.json`, matching where your file exists.
+- New milestone (cross-platform clarification):
+  - Path resolution already uses `path.join(process.cwd(), ...)`, so it works on Windows separators too.
+  - UI fallback text is now OS-agnostic and won’t show Linux-only absolute paths.
+- New milestone (projects morph Task 1):
+  - Storyboard constants + stage model scaffold is complete and integrated into the dialog overlay.
+  - Please verify this baseline is acceptable; after your confirmation, Executor will proceed to Task 2 (actual wrapper shared-element open morph).
+- New milestone (projects morph Task 2):
+  - Shared wrapper morph wiring is implemented in the active projects experience component.
+  - Please verify click-open now feels like the wrapper expands/morphs into the dialog shell.
+  - After confirmation, Executor can proceed to Task 3 (image blur/fade handoff + content reveal sequencing).
+- New milestone (projects morph Task 2 correction):
+  - Bottom drawer behavior has been removed from the active component and replaced by full-page dialog overlay behavior.
+  - Please re-test `/projects`: clicking card should open a full-page dialog layer (not a bottom drawer).
+- New milestone (projects morph visual correction):
+  - Expanded state now uses wrapper-as-page behavior (not a dialog shell), and image sizing remains fixed while wrapper fills the viewport.
+  - Please re-test `/projects` and confirm this is now the intended base before we add blur/fade handoff sequencing.
 
 # Lessons
 
@@ -248,3 +627,4 @@
 - Do not introduce Vite/Vitest unless explicitly approved for this repo.
 - In this repo, prefer `bun test` when adding TDD coverage unless told otherwise.
 - If Tailwind throws "Cannot apply unknown utility class", prefer a direct CSS declaration unless the utility is explicitly defined in theme/config.
+- In Next.js 16, avoid `new Date()` in Client Component initial render (including `useState` initializers); compute time after hydration in `useEffect` or provide a deterministic fallback.

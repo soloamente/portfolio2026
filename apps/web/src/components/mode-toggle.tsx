@@ -3,7 +3,6 @@
 import { Check, Moon, Sun } from "lucide-react";
 
 import { useThemeModeController } from "@/components/theme/theme-mode-controller";
-import { Button } from "@/components/ui/button";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -18,10 +17,10 @@ export function ModeToggle() {
 		<DropdownMenu>
 			<DropdownMenuTrigger
 				render={
-					<Button
-						aria-label="Change theme mode"
-						size="icon"
-						variant="outline"
+					<button
+						aria-label="Change theme mode b"
+						className="relative flex h-fit w-fit cursor-pointer rounded-full bg-background/35 p-2.5 text-lg backdrop-blur-sm"
+						type="button"
 					/>
 				}
 			>
@@ -31,11 +30,11 @@ export function ModeToggle() {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end">
 				<DropdownMenuItem onClick={() => setMode("light")}>
-					Light
+					Day
 					{mode === "light" && <Check className="ml-auto size-4" />}
 				</DropdownMenuItem>
 				<DropdownMenuItem onClick={() => setMode("dark")}>
-					Dark
+					Night
 					{mode === "dark" && <Check className="ml-auto size-4" />}
 				</DropdownMenuItem>
 				<DropdownMenuItem onClick={() => setMode("time-based")}>

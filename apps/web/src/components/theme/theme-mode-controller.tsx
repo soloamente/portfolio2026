@@ -49,9 +49,9 @@ interface ThemeModeControllerProps {
 export function ThemeModeController({ children }: ThemeModeControllerProps) {
 	const { setTheme } = useTheme();
 	const [mode, setMode] = useState<ThemeMode>("time-based");
-	const [dayPeriod, setDayPeriod] = useState<DayPeriod>(() =>
-		getDayPeriod(new Date())
-	);
+	// Use a deterministic initial value to keep prerender stable.
+	// The real period is synced immediately after hydration.
+	const [dayPeriod, setDayPeriod] = useState<DayPeriod>("afternoon");
 	const [isHydrated, setIsHydrated] = useState(false);
 
 	useEffect(() => {
